@@ -1,23 +1,134 @@
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import LeaderboardTable from "@/components/LeaderboardTable";
 import { motion } from "framer-motion";
 import { Trophy } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 
-const weeklyData = [
-  { rank: 1, name: "Priya Sharma", college: "IIT Delhi", level: "Legendary Architect", streak: 45, weeklyXP: 850, trend: "up" as const },
-  { rank: 2, name: "Rahul Verma", college: "NIT Trichy", level: "Platinum Hacker", streak: 32, weeklyXP: 720, trend: "up" as const },
-  { rank: 3, name: "Sneha Patel", college: "BITS Pilani", level: "Gold Strategist", streak: 28, weeklyXP: 680, trend: "down" as const },
-  { rank: 4, name: "Amit Kumar", college: "IIT Bombay", level: "Gold Strategist", streak: 21, weeklyXP: 550, trend: "same" as const },
-  { rank: 5, name: "Kavya Reddy", college: "IIIT Hyderabad", level: "Silver Solver", streak: 18, weeklyXP: 475, trend: "up" as const },
-  { rank: 6, name: "Vikram Singh", college: "DTU", level: "Silver Solver", streak: 15, weeklyXP: 420, trend: "down" as const },
-  { rank: 7, name: "Arjun Menon", college: "VIT Vellore", level: "Gold Strategist", streak: 12, weeklyXP: 375, trend: "up" as const },
-  { rank: 8, name: "Neha Gupta", college: "NIT Warangal", level: "Bronze Coder", streak: 9, weeklyXP: 310, trend: "same" as const },
-  { rank: 9, name: "Rohan Das", college: "IIIT Bangalore", level: "Bronze Coder", streak: 7, weeklyXP: 250, trend: "down" as const },
-  { rank: 10, name: "Ananya Iyer", college: "SRM Chennai", level: "Bronze Coder", streak: 5, weeklyXP: 180, trend: "up" as const },
-];
+interface LeaderboardEntry {
+  rank: number;
+  name: string;
+  college?: string;
+  level: string;
+  streak?: number;
+  weeklyXP?: number;
+  xp?: number;
+  trend?: "up" | "down" | "same";
+}
 
 const Leaderboard = () => {
+  const [weeklyData, setWeeklyData] = useState<LeaderboardEntry[]>([]);
+  const [alltimeData, setAlltimeData] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchLeaderboards = async () => {
+      try {
+        const token = localStorage.getItem('idToken');
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
+        const headers = { 'Authorization': `Bearer ${token}` };
+
+        // Fetch current user data first
+        const userRes = await fetch('http://localhost:3001/api/users/me', { headers });
+        let currentUserId = null;
+        
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          currentUserId = userData.userId;
+        }
+
+        // Try to fetch leaderboards from backend
+        const weeklyRes = await fetch('http://localhost:3001/api/leaderboard/weekly', { headers }).catch(() => null);
+        const alltimeRes = await fetch('http://localhost:3001/api/leaderboard/alltime', { headers }).catch(() => null);
+
+        if (weeklyRes && weeklyRes.ok) {
+          const weekly = await weeklyRes.json();
+          setWeeklyData(
+            weekly.map((entry: any, index: number) => ({
+              rank: entry.weekly_rank || index + 1,
+              name: entry.name,
+              college: entry.college,
+              level: entry.level,
+              streak: entry.current_streak || entry.currentStreak,
+              weeklyXP: entry.weekly_xp || entry.xp,
+              trend: "same" as const,
+            }))
+          );
+        } else {
+          // Mock weekly data as fallback
+          const mockWeekly: LeaderboardEntry[] = [
+            { rank: 1, name: 'Alice Johnson', college: 'MIT', level: 'Gold III', streak: 15, weeklyXP: 1250, trend: 'up' },
+            { rank: 2, name: 'Bob Smith', college: 'Stanford', level: 'Gold II', streak: 10, weeklyXP: 1100, trend: 'up' },
+            { rank: 3, name: 'Charlie Brown', college: 'Harvard', level: 'Gold I', streak: 8, weeklyXP: 950, trend: 'same' },
+            { rank: 4, name: 'Test User', college: 'Your College', level: 'Silver III', streak: 5, weeklyXP: 850, trend: 'up' },
+            { rank: 5, name: 'Diana Prince', college: 'Berkeley', level: 'Silver II', streak: 4, weeklyXP: 700, trend: 'down' },
+            { rank: 6, name: 'Eve Wilson', college: 'CMU', level: 'Silver I', streak: 3, weeklyXP: 650, trend: 'same' },
+            { rank: 7, name: 'Frank Miller', college: 'Caltech', level: 'Bronze III', streak: 2, weeklyXP: 500, trend: 'up' },
+            { rank: 8, name: 'Grace Lee', college: 'Princeton', level: 'Bronze II', streak: 1, weeklyXP: 400, trend: 'same' },
+          ];
+          setWeeklyData(mockWeekly);
+        }
+
+        if (alltimeRes && alltimeRes.ok) {
+          const alltime = await alltimeRes.json();
+          setAlltimeData(
+            alltime.map((entry: any, index: number) => ({
+              rank: entry.rank || index + 1,
+              name: entry.name,
+              college: entry.college,
+              level: entry.level,
+              streak: entry.current_streak || entry.currentStreak,
+              weeklyXP: entry.xp,
+              trend: "same" as const,
+            }))
+          );
+        } else {
+          // Mock all-time data as fallback
+          const mockAlltime: LeaderboardEntry[] = [
+            { rank: 1, name: 'Alice Johnson', college: 'MIT', level: 'Platinum I', streak: 15, weeklyXP: 15000, trend: 'same' },
+            { rank: 2, name: 'Bob Smith', college: 'Stanford', level: 'Gold III', streak: 10, weeklyXP: 12500, trend: 'same' },
+            { rank: 3, name: 'Charlie Brown', college: 'Harvard', level: 'Gold II', streak: 8, weeklyXP: 10200, trend: 'up' },
+            { rank: 4, name: 'Diana Prince', college: 'Berkeley', level: 'Gold I', streak: 4, weeklyXP: 8900, trend: 'down' },
+            { rank: 5, name: 'Eve Wilson', college: 'CMU', level: 'Silver III', streak: 3, weeklyXP: 7500, trend: 'same' },
+            { rank: 6, name: 'Test User', college: 'Your College', level: 'Silver II', streak: 5, weeklyXP: 6800, trend: 'up' },
+            { rank: 7, name: 'Frank Miller', college: 'Caltech', level: 'Silver I', streak: 2, weeklyXP: 5500, trend: 'same' },
+            { rank: 8, name: 'Grace Lee', college: 'Princeton', level: 'Bronze III', streak: 1, weeklyXP: 4200, trend: 'up' },
+          ];
+          setAlltimeData(mockAlltime);
+        }
+
+        console.log('✅ Leaderboard loaded successfully');
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load leaderboard data",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboards();
+  }, [toast]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading leaderboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -37,10 +148,22 @@ const Leaderboard = () => {
               <TabsTrigger value="alltime">All Time</TabsTrigger>
             </TabsList>
             <TabsContent value="weekly">
-              <LeaderboardTable entries={weeklyData} />
+              {weeklyData.length > 0 ? (
+                <LeaderboardTable entries={weeklyData} />
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  No leaderboard data available yet. Start solving problems to appear here!
+                </div>
+              )}
             </TabsContent>
             <TabsContent value="alltime">
-              <LeaderboardTable entries={weeklyData.map((e, i) => ({ ...e, weeklyXP: e.weeklyXP * 12 + i * 300 }))} />
+              {alltimeData.length > 0 ? (
+                <LeaderboardTable entries={alltimeData} />
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  No leaderboard data available yet. Start solving problems to appear here!
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </motion.div>

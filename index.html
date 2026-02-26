@@ -20,7 +20,12 @@
   </head>
 
   <body>
+    <script>
+      // Polyfill for Node.js global variable required by amazon-cognito-identity-js
+      window.global = window;
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
+ 

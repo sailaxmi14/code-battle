@@ -1,77 +1,204 @@
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
-import StreakCard from "@/components/StreakCard";
-import XPBar from "@/components/XPBar";
-import ProblemCard from "@/components/ProblemCard";
 import { motion } from "framer-motion";
-import { Calendar, Target, Trophy } from "lucide-react";
+import { Target, CheckCircle2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import ProblemCard from "@/components/ProblemCard";
 
-const todayProblems = [
-  { title: "Two Sum", difficulty: "Easy" as const, platform: "LeetCode", completed: true, xpReward: 25 },
-  { title: "Valid Parentheses", difficulty: "Easy" as const, platform: "CodeChef", completed: true, xpReward: 25 },
-  { title: "Longest Substring Without Repeating Characters", difficulty: "Medium" as const, platform: "Codeforces", completed: false, xpReward: 50 },
-];
+interface Problem {
+  id: number;
+  problem_id: string; // DynamoDB questionId
+  title: string;
+  difficulty: "Easy" | "Medium" | "Hard";
+  platform: string;
+  completed: boolean;
+  xp_reward: number;
+  problem_url: string;
+}
 
 const Dashboard = () => {
+  const [problems, setProblems] = useState<Problem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  const { user: authUser } = useAuth();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('idToken');
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
+        const headers = { 'Authorization': `Bearer ${token}` };
+        
+        // Fetch user data and today's problems from Codeforces
+        const [userRes, problemsRes] = await Promise.all([
+          fetch('http://localhost:3001/api/users/me', { headers }),
+          fetch('http://localhost:3001/api/codeforces-problems/daily', { headers }).catch(() => null),
+        ]);
+
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          // User data is available in authUser from context
+        }
+
+        // If problems endpoint works, use real data
+        if (problemsRes && problemsRes.ok) {
+          const problemsData = await problemsRes.json();
+          setProblems(problemsData);
+        } else {
+          // Fallback to mock data if backend doesn't have problems yet
+          const mockProblems: Problem[] = [
+            {
+              id: 1,
+              problem_id: 'mock_1',
+              title: 'Two Sum',
+              difficulty: 'Easy',
+              platform: 'LeetCode',
+              completed: false,
+              xp_reward: 50,
+              problem_url: 'https://leetcode.com/problems/two-sum/',
+            },
+            {
+              id: 2,
+              problem_id: 'mock_2',
+              title: 'Valid Parentheses',
+              difficulty: 'Easy',
+              platform: 'LeetCode',
+              completed: false,
+              xp_reward: 50,
+              problem_url: 'https://leetcode.com/problems/valid-parentheses/',
+            },
+            {
+              id: 3,
+              problem_id: 'mock_3',
+              title: 'Merge Two Sorted Lists',
+              difficulty: 'Medium',
+              platform: 'LeetCode',
+              completed: false,
+              xp_reward: 100,
+              problem_url: 'https://leetcode.com/problems/merge-two-sorted-lists/',
+            },
+            {
+              id: 4,
+              problem_id: 'mock_4',
+              title: 'Binary Tree Inorder Traversal',
+              difficulty: 'Easy',
+              platform: 'LeetCode',
+              completed: false,
+              xp_reward: 50,
+              problem_url: 'https://leetcode.com/problems/binary-tree-inorder-traversal/',
+            },
+            {
+              id: 5,
+              problem_id: 'mock_5',
+              title: 'Maximum Subarray',
+              difficulty: 'Medium',
+              platform: 'LeetCode',
+              completed: false,
+              xp_reward: 100,
+              problem_url: 'https://leetcode.com/problems/maximum-subarray/',
+            },
+          ];
+          setProblems(mockProblems);
+        }
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to load dashboard data",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const completedCount = problems.filter((p) => p.completed).length;
+  const totalCount = problems.length;
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="container px-4 pt-24 pb-16">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold">Welcome back, <span className="text-gradient-primary">Arjun</span></h1>
-            <p className="mt-1 text-muted-foreground flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Monday, February 17, 2026
+            <h1 className="text-3xl font-bold">
+              Welcome back, <span className="text-gradient-primary">{authUser?.name || 'User'}</span>
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              Track your daily progress and solve problems
             </p>
           </div>
 
-          {/* Stats Row */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
-            <StreakCard streak={12} bestStreak={24} />
-            <XPBar
-              currentXP={1250}
-              nextLevelXP={2000}
-              level="Gold Strategist"
-              levelColor="text-rank-gold border-rank-gold/30 bg-rank-gold/10"
-            />
-            <div className="rounded-xl border border-border bg-gradient-card p-6 shadow-card">
-              <div className="flex items-center gap-2 mb-4">
-                <Trophy className="h-5 w-5 text-rank-gold" />
-                <span className="text-sm font-medium text-muted-foreground">Weekly Rank</span>
+          {/* Today's Completed Count */}
+          <div className="mb-8">
+            <div className="rounded-xl border border-border bg-gradient-card p-8 shadow-card">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle2 className="h-6 w-6 text-primary" />
+                    <h2 className="text-xl font-bold">Problems Completed Today</h2>
+                  </div>
+                  <p className="text-muted-foreground">Keep up the great work!</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-6xl font-bold text-gradient-primary">
+                    {completedCount}
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">out of {totalCount}</p>
+                </div>
               </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-5xl font-bold text-foreground">#7</span>
-                <span className="text-sm text-success font-medium">↑3</span>
-              </div>
-              <p className="mt-2 text-xs text-muted-foreground">175 XP earned this week</p>
             </div>
           </div>
 
           {/* Today's Problems */}
-          <div className="mb-8">
+          <div>
             <div className="flex items-center gap-2 mb-4">
               <Target className="h-5 w-5 text-primary" />
               <h2 className="text-xl font-bold">Today's Problems</h2>
-              <span className="ml-auto text-sm text-muted-foreground">
-                {todayProblems.filter((p) => p.completed).length}/{todayProblems.length} completed
-              </span>
             </div>
             <div className="grid gap-3">
-              {todayProblems.map((problem) => (
-                <ProblemCard key={problem.title} {...problem} />
-              ))}
-            </div>
-          </div>
-
-          {/* Connected Platforms */}
-          <div>
-            <h2 className="text-xl font-bold mb-4">Connected Platforms</h2>
-            <div className="flex flex-wrap gap-3">
-              {["LeetCode", "CodeChef", "Codeforces"].map((p) => (
-                <div key={p} className="flex items-center gap-2 rounded-lg border border-success/30 bg-success/10 px-4 py-2 text-sm font-mono">
-                  <div className="h-2 w-2 rounded-full bg-success" />
-                  {p}
-                </div>
+              {problems.map((problem) => (
+                <ProblemCard 
+                  key={problem.id} 
+                  id={problem.id}
+                  problemId={problem.problem_id}
+                  title={problem.title}
+                  difficulty={problem.difficulty}
+                  platform={problem.platform}
+                  completed={problem.completed}
+                  xpReward={problem.xp_reward} 
+                  problemUrl={problem.problem_url}
+                  onComplete={() => {
+                    // Update local state
+                    setProblems(prev => 
+                      prev.map(p => p.id === problem.id ? { ...p, completed: true } : p)
+                    );
+                    toast({
+                      title: "Problem Completed!",
+                      description: `You earned ${problem.xp_reward} XP`,
+                    });
+                  }}
+                />
               ))}
             </div>
           </div>
