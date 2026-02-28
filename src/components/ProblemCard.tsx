@@ -51,11 +51,13 @@ const ProblemCard = ({ id, problemId, title, difficulty, platform, completed, xp
     setIsVerifying(true);
     try {
       const token = localStorage.getItem('idToken');
+      const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
+      
       if (!token) {
         throw new Error('Not authenticated');
       }
 
-      const response = await fetch(`http://localhost:3001/api/codeforces-problems/verify/${problemId}`, {
+      const response = await fetch(`${API_URL}/api/codeforces-problems/verify/${problemId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -113,7 +115,7 @@ const ProblemCard = ({ id, problemId, title, difficulty, platform, completed, xp
         throw new Error('Not authenticated');
       }
 
-      const response = await fetch(`http://localhost:3001/api/problems/${problemId}/complete`, {
+      const response = await fetch(`${API_URL}/api/problems/${problemId}/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

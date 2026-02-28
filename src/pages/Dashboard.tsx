@@ -33,11 +33,12 @@ const Dashboard = () => {
         }
 
         const headers = { 'Authorization': `Bearer ${token}` };
+        const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
         
         // Fetch user data and today's problems from Codeforces
         const [userRes, problemsRes] = await Promise.all([
-          fetch('http://localhost:3001/api/users/me', { headers }),
-          fetch('http://localhost:3001/api/codeforces-problems/daily', { headers }).catch(() => null),
+          fetch(`${API_URL}/api/users/me`, { headers }),
+          fetch(`${API_URL}/api/codeforces-problems/daily`, { headers }).catch(() => null),
         ]);
 
         if (userRes.ok) {

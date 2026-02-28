@@ -49,9 +49,10 @@ const Profile = () => {
         }
 
         const headers = { 'Authorization': `Bearer ${token}` };
+        const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
 
         // Fetch user data
-        const userRes = await fetch('http://localhost:3001/api/users/me', { headers });
+        const userRes = await fetch(`${API_URL}/api/users/me`, { headers });
         
         if (!userRes.ok) {
           throw new Error('Failed to fetch user data');
@@ -77,7 +78,7 @@ const Profile = () => {
         setEditCollege(mappedUser.college || "");
 
         // Try to fetch history
-        const historyRes = await fetch('http://localhost:3001/api/streaks/history', { headers }).catch(() => null);
+        const historyRes = await fetch(`${API_URL}/api/streaks/history`, { headers }).catch(() => null);
         
         if (historyRes && historyRes.ok) {
           const historyData = await historyRes.json();
@@ -123,7 +124,7 @@ const Profile = () => {
         'Content-Type': 'application/json',
       };
 
-      const response = await fetch('http://localhost:3001/api/users/me', {
+      const response = await fetch(`${API_URL}/api/users/me`, {
         method: 'PATCH',
         headers,
         body: JSON.stringify({

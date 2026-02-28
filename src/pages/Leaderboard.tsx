@@ -33,9 +33,10 @@ const Leaderboard = () => {
         }
 
         const headers = { 'Authorization': `Bearer ${token}` };
+        const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
 
         // Fetch current user data first
-        const userRes = await fetch('http://localhost:3001/api/users/me', { headers });
+        const userRes = await fetch(`${API_URL}/api/users/me`, { headers });
         let currentUserId = null;
         
         if (userRes.ok) {
@@ -44,8 +45,8 @@ const Leaderboard = () => {
         }
 
         // Try to fetch leaderboards from backend
-        const weeklyRes = await fetch('http://localhost:3001/api/leaderboard/weekly', { headers }).catch(() => null);
-        const alltimeRes = await fetch('http://localhost:3001/api/leaderboard/alltime', { headers }).catch(() => null);
+        const weeklyRes = await fetch(`${API_URL}/api/leaderboard/weekly`, { headers }).catch(() => null);
+        const alltimeRes = await fetch(`${API_URL}/api/leaderboard/alltime`, { headers }).catch(() => null);
 
         if (weeklyRes && weeklyRes.ok) {
           const weekly = await weeklyRes.json();

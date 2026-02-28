@@ -64,14 +64,15 @@ const Analytics = () => {
         }
 
         const headers = { 'Authorization': `Bearer ${token}` };
+        const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
 
         // Try to fetch analytics from backend
         const [topicsRes, weaknessesRes, difficultyRes, rewardsRes, reportRes] = await Promise.all([
-          fetch('http://localhost:3001/api/analytics/topics', { headers }).catch(() => null),
-          fetch('http://localhost:3001/api/analytics/weaknesses', { headers }).catch(() => null),
-          fetch('http://localhost:3001/api/analytics/difficulty-progress?days=30', { headers }).catch(() => null),
-          fetch('http://localhost:3001/api/analytics/rewards', { headers }).catch(() => null),
-          fetch('http://localhost:3001/api/analytics/weekly-report/latest', { headers }).catch(() => null),
+          fetch(`${API_URL}/api/analytics/topics`, { headers }).catch(() => null),
+          fetch(`${API_URL}/api/analytics/weaknesses`, { headers }).catch(() => null),
+          fetch(`${API_URL}/api/analytics/difficulty-progress?days=30`, { headers }).catch(() => null),
+          fetch(`${API_URL}/api/analytics/rewards`, { headers }).catch(() => null),
+          fetch(`${API_URL}/api/analytics/weekly-report/latest`, { headers }).catch(() => null),
         ]);
 
         // Use real data if available, otherwise use mock data

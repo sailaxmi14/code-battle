@@ -43,9 +43,10 @@ const Streaks = () => {
         }
 
         const headers = { 'Authorization': `Bearer ${token}` };
+        const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
 
         // Fetch user data
-        const userRes = await fetch('http://localhost:3001/api/users/me', { headers });
+        const userRes = await fetch(`${API_URL}/api/users/me`, { headers });
         
         if (!userRes.ok) {
           throw new Error('Failed to fetch user data');
@@ -64,7 +65,7 @@ const Streaks = () => {
         setUser(mappedUser);
 
         // Try to fetch streak history (may not be implemented yet)
-        const historyRes = await fetch('http://localhost:3001/api/streaks/history', { headers }).catch(() => null);
+        const historyRes = await fetch(`${API_URL}/api/streaks/history`, { headers }).catch(() => null);
         
         if (historyRes && historyRes.ok) {
           const historyData = await historyRes.json();
@@ -82,7 +83,7 @@ const Streaks = () => {
         }
 
         // Try to fetch leaderboard (may not be implemented yet)
-        const leaderboardRes = await fetch('http://localhost:3001/api/leaderboard/alltime', { headers }).catch(() => null);
+        const leaderboardRes = await fetch(`${API_URL}/api/leaderboard/alltime`, { headers }).catch(() => null);
         
         if (leaderboardRes && leaderboardRes.ok) {
           const leaderboardData = await leaderboardRes.json();
