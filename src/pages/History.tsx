@@ -44,13 +44,14 @@ const History = () => {
         }
 
         const headers = { 'Authorization': `Bearer ${token}` };
+        const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
 
         // Fetch from BOTH old history API and new solved-problems API
         const [oldHistoryRes, newHistoryRes, oldStatsRes, newStatsRes] = await Promise.all([
-          fetch('http://localhost:3001/api/history', { headers }).catch(() => null),
-          fetch('http://localhost:3001/api/solved-problems', { headers }).catch(() => null),
-          fetch('http://localhost:3001/api/history/stats', { headers }).catch(() => null),
-          fetch('http://localhost:3001/api/solved-problems/stats', { headers }).catch(() => null),
+          fetch(`${API_URL}/api/history`, { headers }).catch(() => null),
+          fetch(`${API_URL}/api/solved-problems`, { headers }).catch(() => null),
+          fetch(`${API_URL}/api/history/stats`, { headers }).catch(() => null),
+          fetch(`${API_URL}/api/solved-problems/stats`, { headers }).catch(() => null),
         ]);
 
         // Combine old and new history
