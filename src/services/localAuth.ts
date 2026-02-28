@@ -17,16 +17,27 @@ export interface AuthTokens {
 
 // Simple mock JWT token generator
 const generateMockToken = (email: string, sub: string): string => {
-  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-  const payload = btoa(JSON.stringify({
+  // Create a proper JWT structure that can be decoded by jwt.decode()
+  const header = {
+    alg: 'HS256',
+    typ: 'JWT'
+  };
+  
+  const payload = {
     sub,
     email,
     'cognito:username': email,
     name: email.split('@')[0],
     exp: Math.floor(Date.now() / 1000) + 86400, // 24 hours
-  }));
-  const signature = btoa('mock-signature');
-  return `${header}.${payload}.${signature}`;
+    iat: Math.floor(Date.now() / 1000), // issued at
+  };
+  
+  // Create base64url encoded parts (JWT standard)
+  const headerB64 = btoa(JSON.stringify(header)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  const payloadB64 = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  const signature = 'mock-signature-for-local-dev';
+  
+  return `${headerB64}.${payloadB64}.${signature}`;
 };
 
 export const signUp = async (data: SignUpData): Promise<any> => {
