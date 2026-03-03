@@ -56,6 +56,7 @@ export interface User {
   name: string;
   phoneNumber?: string;
   college?: string;
+  codeforcesHandle?: string; // Saved Codeforces username
   level: string;
   xp: number;
   currentStreak: number;

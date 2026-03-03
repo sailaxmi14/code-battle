@@ -1,6 +1,6 @@
 import { Check, ExternalLink, Clock, Zap, CheckCircle2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,13 +36,56 @@ const ProblemCard = ({ id, problemId, title, difficulty, platform, completed, xp
   const [isVerifying, setIsVerifying] = useState(false);
   const [showVerifyDialog, setShowVerifyDialog] = useState(false);
   const [codeforcesHandle, setCodeforcesHandle] = useState("");
+  const [savedHandle, setSavedHandle] = useState<string | null>(null);
+  const [isLoadingHandle, setIsLoadingHandle] = useState(false);
   const { toast } = useToast();
+
+  // Fetch saved Codeforces handle when component mounts
+  const fetchSavedHandle = async () => {
+    try {
+      setIsLoadingHandle(true);
+      const token = localStorage.getItem('idToken');
+      const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace('/api', '');
+      
+      if (!token) return;
+
+      const response = await fetch(`${API_URL}/api/users/me`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        if (userData.codeforcesHandle) {
+          setSavedHandle(userData.codeforcesHandle);
+          setCodeforcesHandle(userData.codeforcesHandle);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch saved handle:', error);
+    } finally {
+      setIsLoadingHandle(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSavedHandle();
+  }, []);
 
   const handleVerify = async () => {
     if (!codeforcesHandle.trim()) {
       toast({
         title: "Error",
-        description: "Please enter your Codeforces handle",
+        description: "Please enter your Codeforces username",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if user entered an email instead of username
+    if (codeforcesHandle.includes('@')) {
+      toast({
+        title: "Invalid Input",
+        description: "Please enter your Codeforces username, not email. Your username is visible on your Codeforces profile page.",
         variant: "destructive",
       });
       return;
@@ -51,7 +94,7 @@ const ProblemCard = ({ id, problemId, title, difficulty, platform, completed, xp
     setIsVerifying(true);
     try {
       const token = localStorage.getItem('idToken');
-      const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
+      const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace('/api', '');
       
       if (!token) {
         throw new Error('Not authenticated');
@@ -74,6 +117,11 @@ const ProblemCard = ({ id, problemId, title, difficulty, platform, completed, xp
       const result = await response.json();
 
       if (result.verified) {
+        // Update saved handle state if this was first time
+        if (!savedHandle) {
+          setSavedHandle(codeforcesHandle.trim());
+        }
+        
         toast({
           title: "Problem Verified! 🎉",
           description: `You earned ${result.xpEarned} XP! Current streak: ${result.currentStreak} days`,
@@ -202,12 +250,14 @@ const ProblemCard = ({ id, problemId, title, difficulty, platform, completed, xp
                   <DialogHeader>
                     <DialogTitle>Verify Codeforces Submission</DialogTitle>
                     <DialogDescription>
-                      Enter your Codeforces handle to verify if you've solved this problem
+                      {savedHandle 
+                        ? `Verifying with your saved handle: ${savedHandle}`
+                        : 'Enter your Codeforces username to verify if you\'ve solved this problem'}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                      <Label htmlFor="handle">Codeforces Handle</Label>
+                      <Label htmlFor="handle">Codeforces Username</Label>
                       <Input
                         id="handle"
                         placeholder="e.g., tourist"
@@ -218,17 +268,23 @@ const ProblemCard = ({ id, problemId, title, difficulty, platform, completed, xp
                             handleVerify();
                           }
                         }}
+                        disabled={isLoadingHandle}
                       />
                       <p className="text-xs text-muted-foreground">
-                        Your Codeforces username (case-sensitive)
+                        {savedHandle 
+                          ? 'Your Codeforces username is saved. You can change it in Profile settings.'
+                          : 'Enter your Codeforces username (case-sensitive). This will be saved for future verifications.'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Note: Use your Codeforces username/handle, not email. Find it at codeforces.com/profile/[your-username]
                       </p>
                     </div>
                     <Button 
                       onClick={handleVerify} 
-                      disabled={isVerifying}
+                      disabled={isVerifying || isLoadingHandle}
                       className="w-full"
                     >
-                      {isVerifying ? 'Verifying...' : 'Verify Submission'}
+                      {isVerifying ? 'Verifying...' : isLoadingHandle ? 'Loading...' : 'Verify Submission'}
                     </Button>
                   </div>
                 </DialogContent>

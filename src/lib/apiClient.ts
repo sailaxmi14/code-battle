@@ -1,5 +1,5 @@
 // API Client for Backend Communication
-const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
+const BACKEND_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace('/api', '');
 
 export interface ApiError {
   error: string;

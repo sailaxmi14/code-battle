@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import { motion } from "framer-motion";
-import { Flame, Trophy, Calendar, TrendingUp, Users, Target } from "lucide-react";
+import { Flame, Trophy, Calendar, TrendingUp, Users, Target, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -10,6 +10,8 @@ interface User {
   name: string;
   current_streak: number;
   best_streak: number;
+  streakTimeRemaining?: number;
+  streakExpiringSoon?: boolean;
 }
 
 interface StreakHistory {
@@ -31,6 +33,8 @@ const Streaks = () => {
   const [history, setHistory] = useState<StreakHistory[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
+  const [displayTime, setDisplayTime] = useState("");
+  const [isExpiring, setIsExpiring] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -43,7 +47,7 @@ const Streaks = () => {
         }
 
         const headers = { 'Authorization': `Bearer ${token}` };
-        const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
+        const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace('/api', '');
 
         // Fetch user data
         const userRes = await fetch(`${API_URL}/api/users/me`, { headers });
@@ -60,6 +64,8 @@ const Streaks = () => {
           name: userData.name,
           current_streak: userData.currentStreak || 0,
           best_streak: userData.bestStreak || 0,
+          streakTimeRemaining: userData.streakTimeRemaining,
+          streakExpiringSoon: userData.streakExpiringSoon,
         };
 
         setUser(mappedUser);
@@ -123,6 +129,41 @@ const Streaks = () => {
 
     fetchData();
   }, [toast]);
+
+  // Timer update effect
+  useEffect(() => {
+    if (!user || !user.streakTimeRemaining || user.streakTimeRemaining <= 0 || user.current_streak === 0) {
+      setDisplayTime("");
+      setIsExpiring(false);
+      return;
+    }
+
+    const startTime = Date.now();
+    const initialRemaining = user.streakTimeRemaining;
+
+    const updateTimer = () => {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, initialRemaining - elapsed);
+      
+      if (remaining <= 0) {
+        setDisplayTime("Streak expired - solve a problem to restart!");
+        setIsExpiring(false);
+        return;
+      }
+
+      const hours = Math.floor(remaining / (1000 * 60 * 60));
+      const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+      setDisplayTime(`${hours}h ${minutes}m ${seconds}s`);
+      setIsExpiring(user.streakExpiringSoon || remaining < 2 * 60 * 60 * 1000);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   if (loading) {
     return (
@@ -193,9 +234,19 @@ const Streaks = () => {
                   </span>
                   <span className="text-2xl text-muted-foreground">days</span>
                 </div>
-                <p className="mt-4 text-sm text-muted-foreground">
-                  Complete at least 1 problem today to continue your streak!
-                </p>
+                {displayTime && user.current_streak > 0 ? (
+                  <div className={`mt-4 flex items-center gap-2 text-sm ${isExpiring ? 'text-destructive font-semibold animate-pulse' : 'text-muted-foreground'}`}>
+                    <Clock className="h-4 w-4" />
+                    <span>
+                      {isExpiring && '⚠️ '}
+                      {displayTime} remaining
+                    </span>
+                  </div>
+                ) : (
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    Complete at least 1 problem today to continue your streak!
+                  </p>
+                )}
               </CardContent>
             </Card>
 

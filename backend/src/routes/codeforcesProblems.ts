@@ -119,6 +119,13 @@ router.post('/verify/:problemId', authenticate, async (req, res) => {
       });
     }
     
+    // Save Codeforces handle to user profile if not already saved
+    const user = await dynamodbUserService.getUserById(req.userId!);
+    if (user && !user.codeforcesHandle) {
+      console.log('💾 Saving Codeforces handle to user profile:', codeforcesHandle);
+      await dynamodbUserService.updateUser(req.userId!, { codeforcesHandle });
+    }
+    
     // Find the problem in daily cache to get difficulty
     const problem = dailyProblemsCache.find(p => p.problem_id === problemId);
     if (!problem) {

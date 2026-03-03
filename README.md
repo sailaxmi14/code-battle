@@ -1,405 +1,260 @@
 # CodeBattle - Competitive Programming Platform
 
-A full-stack web application for competitive programming practice with AWS Cognito authentication, DynamoDB backend, and real-time progress tracking.
+A full-stack web application for tracking coding progress, managing daily problem-solving streaks, and competing with other coders.
 
 ## Features
 
-- ✅ **AWS Cognito Authentication** - Secure user registration and login without email verification
-- 📊 **User Dashboard** - Track daily problem completion
-- 🔥 **Streak Tracking** - Monitor current and best coding streaks
-- 📈 **Progress History** - View all completed problems with statistics
-- 🏆 **Leaderboard** - Compete with other users
-- 👤 **User Profile** - Manage profile and change password
-- 💾 **DynamoDB Backend** - Scalable NoSQL database for all user data
-- 🎯 **Problem Management** - Curated coding problems from LeetCode
+- 🔥 **Daily Streak Tracking** - Maintain your coding consistency
+- 🏆 **Leaderboard System** - Compete with other coders
+- � **Analytics Dashboard** - Track your progress and performance
+- ✅ **Codeforces Integration** - Auto-verify problem submissions
+- 👤 **User Profiles** - Manage your coding journey
+- � **XP & Leveling System** - Earn rewards for solving problems
 
 ## Tech Stack
 
 ### Frontend
 - React 18 with TypeScript
-- Vite for build tooling
-- TailwindCSS for styling
-- Framer Motion for animations
-- Shadcn/ui components
-- React Router for navigation
+- Vite (Build tool)
+- Tailwind CSS + shadcn/ui
+- React Router
+- Framer Motion
 
 ### Backend
-- Node.js with Express
+- Node.js + Express
 - TypeScript
-- AWS Cognito for authentication
-- AWS DynamoDB for data storage
-- JWT token validation
+- AWS Cognito (Authentication)
+- AWS DynamoDB (Database)
+- Codeforces API Integration
 
-### AWS Services
-- **Cognito** - User authentication and management
-- **DynamoDB** - NoSQL database for users, problems, progress, and streaks
-- **IAM** - Access management
+## Prerequisites
 
-## Quick Start
+- Node.js 18+ and npm
+- AWS Account (for Cognito & DynamoDB)
+- Codeforces API credentials (optional)
 
-### Prerequisites
+## Local Development Setup
 
-- Node.js v16 or higher
-- AWS Account
-- AWS CLI configured (optional)
-
-### 1. Clone the Repository
-
+### 1. Clone Repository
 ```bash
-git clone <repository-url>
-cd codebattle
+git clone https://github.com/sailaxmi14/code-battle.git
+cd code-battle
 ```
 
-### 2. AWS Cognito Setup
+### 2. Install Dependencies
+```bash
+# Install frontend dependencies
+npm install
 
-1. Go to [AWS Cognito Console](https://console.aws.amazon.com/cognito)
-2. Create a new User Pool:
-   - Sign-in: Email
-   - Password policy: Your choice
-   - MFA: Disabled (for development)
-   - **IMPORTANT**: Disable email verification
-   - Required attributes: name, email
-3. Create App Client (no client secret)
-4. Note your User Pool ID and App Client ID
-
-### 3. Configure Frontend
-
-Edit `src/config/cognito.ts`:
-
-```typescript
-export const cognitoConfig = {
-  region: 'us-east-1',
-  userPoolId: 'us-east-1_XXXXXXXXX', // Your User Pool ID
-  userPoolWebClientId: 'XXXXXXXXXXXXXXXXXXXXXXXXXX', // Your App Client ID
-};
+# Install backend dependencies
+cd backend
+npm install
+cd ..
 ```
 
-### 4. Configure Backend
+### 3. Configure Environment Variables
 
-Create `backend/.env`:
-
+**Frontend (.env):**
 ```env
-# AWS Configuration
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=your_access_key_id
-AWS_SECRET_ACCESS_KEY=your_secret_access_key
+VITE_API_URL=http://localhost:3001/api
+```
 
-# Server Configuration
+**Backend (backend/.env):**
+```env
 PORT=3001
 NODE_ENV=development
-
-# JWT Secret
-JWT_SECRET=your-secret-key-change-in-production
-
-# Frontend URL
+JWT_SECRET=your-jwt-secret-here
 FRONTEND_URL=http://localhost:8080
+
+# AWS Configuration
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+
+# DynamoDB Tables
+DYNAMODB_PROBLEMS_TABLE=CodeBattleProblems
+
+# Codeforces API (optional)
+CODEFORCES_API_KEY=your-api-key
+CODEFORCES_API_SECRET=your-api-secret
 ```
 
-### 5. Setup DynamoDB Tables
+### 4. Setup DynamoDB Tables
 
-#### On Linux/Mac:
+Run the setup scripts to create required tables:
 
+**Windows:**
+```bash
+cd backend
+.\setup-dynamodb.bat
+```
+
+**Linux/Mac:**
 ```bash
 cd backend
 chmod +x setup-dynamodb.sh
 ./setup-dynamodb.sh
 ```
 
-#### On Windows:
-
+### 5. Build Backend
 ```bash
 cd backend
-setup-dynamodb.bat
+npm run build
 ```
 
-#### Manual Setup:
+### 6. Start Development Servers
 
+**Terminal 1 - Backend:**
 ```bash
 cd backend
-npm install
-node create-users-dynamodb-table.js
-node create-questions-dynamodb-table.js
-node seed-questions-dynamodb.js
-```
-
-### 6. Start the Application
-
-#### Terminal 1 - Backend:
-
-```bash
-cd backend
-npm install
 npm run dev
 ```
 
-Backend runs on http://localhost:3001
-
-#### Terminal 2 - Frontend:
-
+**Terminal 2 - Frontend:**
 ```bash
-npm install
 npm run dev
 ```
 
-Frontend runs on http://localhost:8080
+Access the application at: http://localhost:5173
 
-### 7. Test the Application
+## Production Build
 
-1. Open http://localhost:8080
-2. Register a new account
-3. Complete a problem
-4. Check your streak and history
+### Build Frontend
+```bash
+npm run build
+```
+
+### Serve Production Build
+```bash
+npm install -g serve
+serve -s dist -p 8080
+```
+
+## EC2 Deployment
+
+See [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) for detailed EC2 deployment instructions.
+
+### Quick EC2 Setup
+
+1. **Update Environment Variables** with EC2 IP
+2. **Build Backend**: `cd backend && npm run build`
+3. **Start Backend**: `npm run dev`
+4. **Build Frontend**: `npm run build`
+5. **Serve Frontend**: `serve -s dist -p 8080`
 
 ## Project Structure
 
 ```
-codebattle/
-├── src/                          # Frontend source
-│   ├── components/               # React components
-│   ├── pages/                    # Page components
-│   ├── contexts/                 # React contexts (Auth)
-│   ├── services/                 # API services
-│   ├── config/                   # Configuration files
-│   └── lib/                      # Utilities
-├── backend/                      # Backend source
+code-battle/
+├── src/                      # Frontend source
+│   ├── components/          # React components
+│   ├── pages/              # Page components
+│   ├── services/           # API services
+│   ├── contexts/           # React contexts
+│   └── lib/                # Utilities
+├── backend/                 # Backend source
 │   ├── src/
-│   │   ├── routes/               # API routes
-│   │   ├── services/             # Business logic
-│   │   ├── middleware/           # Express middleware
-│   │   └── server.ts             # Server entry point
-│   ├── create-users-dynamodb-table.js
-│   ├── create-questions-dynamodb-table.js
-│   └── seed-questions-dynamodb.js
-└── README.md
+│   │   ├── routes/         # API routes
+│   │   ├── services/       # Business logic
+│   │   ├── middleware/     # Express middleware
+│   │   └── config/         # Configuration
+│   └── dist/               # Compiled backend
+├── public/                  # Static assets
+└── dist/                    # Production build
+
 ```
+
+## Key Features Explained
+
+### Streak System
+- Solve at least 1 problem per day to maintain streak
+- Current streak resets if you miss a day
+- Best streak is your personal record (never decreases)
+- 12-hour grace period for consecutive days
+
+### Codeforces Integration
+- Auto-verify problem submissions
+- Username saved after first verification
+- Supports Codeforces username (not email)
+- Real-time submission checking
+
+### Leaderboard
+- Weekly and All-Time rankings
+- Shows current and best streaks
+- XP-based ranking system
+- Real-time updates
 
 ## API Endpoints
 
 ### Authentication
-- `POST /api/auth/cognito-register` - Register user after Cognito signup
-- `POST /api/auth/login` - Legacy login (not used with Cognito)
+- `POST /api/auth/cognito-register` - Register user
+- `POST /api/auth/cognito-login` - Login user
 
-### Users
-- `GET /api/users/me` - Get current user profile
-- `PATCH /api/users/me` - Update user profile
+### User
+- `GET /api/users/me` - Get current user
+- `PATCH /api/users/me` - Update profile
 
 ### Problems
-- `GET /api/problems/today` - Get today's assigned problems
-- `POST /api/problems/:problemId/complete` - Mark problem as complete
-
-### Streaks
-- `GET /api/streaks/me` - Get user streak data
-- `GET /api/streaks/history` - Get streak history (last 30 days)
-
-### History
-- `GET /api/history` - Get problem completion history
-- `GET /api/history/stats` - Get history statistics
+- `GET /api/codeforces-problems/daily` - Get daily problems
+- `POST /api/codeforces-problems/verify/:problemId` - Verify solution
 
 ### Leaderboard
-- `GET /api/leaderboard/weekly` - Get weekly leaderboard
-- `GET /api/leaderboard/alltime` - Get all-time leaderboard
+- `GET /api/leaderboard/weekly` - Weekly leaderboard
+- `GET /api/leaderboard/alltime` - All-time leaderboard
 
-## DynamoDB Tables
+### Streaks
+- `GET /api/streaks/history` - Streak history
+- `GET /api/streaks/current` - Current streak
 
-### CodeBattleUsers
-- Primary Key: `userId` (String)
-- Attributes: email, name, college, level, xp, currentStreak, bestStreak, totalProblemsSolved
-- GSI: `CognitoSubIndex` (cognitoSub), `EmailIndex` (email)
+## Environment Variables
 
-### CodeBattleQuestions
-- Primary Key: `questionId` (String)
-- Attributes: title, description, difficulty, platform, problemUrl, tags
-- GSI: `difficulty-createdAt-index`
+### Required
+- `AWS_ACCESS_KEY_ID` - AWS credentials
+- `AWS_SECRET_ACCESS_KEY` - AWS credentials
+- `AWS_REGION` - AWS region (default: us-east-1)
 
-### CodeBattleUserProgress
-- Primary Key: `userId` (String), Sort Key: `questionId` (String)
-- Attributes: difficulty, completed, completedAt, attempts, submittedUrl
-
-### CodeBattleUserStreaks
-- Primary Key: `userId` (String)
-- Attributes: currentStreak, highestStreak, lastSolvedDate, totalProblemsSolved
-
-### CodeBattleDailySolved
-- Primary Key: `userId` (String), Sort Key: `date` (String)
-- Attributes: problemsSolved, totalCount, easyCount, moderateCount, hardCount
-
-## Features in Detail
-
-### Authentication Flow
-
-1. User registers on frontend
-2. AWS Cognito creates user account
-3. Frontend receives JWT tokens
-4. Backend validates JWT and creates user record in DynamoDB
-5. User is logged in and redirected to dashboard
-
-### Problem Completion Flow
-
-1. User views today's problems on dashboard
-2. User clicks "Solve" to open problem on LeetCode
-3. After solving, user clicks "Complete"
-4. Backend updates:
-   - User progress in DynamoDB
-   - User XP and total problems solved
-   - Current and best streak
-   - Daily solved count
-5. Frontend shows success message with XP earned
-
-### Streak Calculation
-
-- Streak increases when user completes at least 1 problem per day
-- Streak resets to 0 if user misses a day
-- Best streak is saved permanently
-- Streak is updated in real-time after problem completion
-
-## Development
-
-### Frontend Development
-
-```bash
-npm run dev          # Start dev server
-npm run build        # Build for production
-npm run preview      # Preview production build
-```
-
-### Backend Development
-
-```bash
-cd backend
-npm run dev          # Start with nodemon (auto-reload)
-npm start            # Start production server
-```
-
-### Adding New Problems
-
-1. Edit `backend/seed-questions-dynamodb.js`
-2. Add new problem objects to the `questions` array
-3. Run: `node seed-questions-dynamodb.js`
+### Optional
+- `CODEFORCES_API_KEY` - For Codeforces integration
+- `CODEFORCES_API_SECRET` - For Codeforces integration
+- `JWT_SECRET` - Custom JWT secret
 
 ## Troubleshooting
 
-### "User Pool does not exist"
-- Verify User Pool ID in `src/config/cognito.ts`
-- Ensure User Pool is in the correct region
+### CORS Errors
+- Ensure `FRONTEND_URL` in backend/.env matches your frontend URL
+- Rebuild backend after changing .env
 
-### Backend connection failed
-- Check if backend is running on port 3001
-- Verify AWS credentials in `backend/.env`
-- Check DynamoDB tables exist in AWS Console
+### Connection Refused
+- Check backend is running on correct port
+- Verify `VITE_API_URL` in frontend .env
+- Rebuild frontend after changing .env
 
-### No problems showing
-- Run `node seed-questions-dynamodb.js`
-- Check `CodeBattleQuestions` table in DynamoDB
-
-### Authentication errors
-- Clear browser localStorage
-- Verify Cognito configuration
-- Check App Client ID is correct
-
-## Production Deployment
-
-### Frontend
-1. Update Cognito config with production values
-2. Build: `npm run build`
-3. Deploy `dist` folder to Vercel/Netlify/S3
-
-### Backend
-1. Update environment variables
-2. Deploy to AWS Lambda/EC2/ECS
-3. Configure CORS for production domain
-4. Use AWS Secrets Manager for credentials
-
-### Security Checklist
-- [ ] Change JWT_SECRET to strong random value
-- [ ] Enable HTTPS
-- [ ] Configure proper CORS origins
-- [ ] Use AWS Secrets Manager
-- [ ] Enable CloudWatch logging
-- [ ] Set up DynamoDB backups
-- [ ] Configure Cognito password policies
-- [ ] Enable MFA for production
+### DynamoDB Errors
+- Verify AWS credentials are correct
+- Check DynamoDB tables exist
+- Ensure IAM permissions are set
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
-MIT License - see LICENSE file for details
+This project is licensed under the MIT License.
 
 ## Support
 
-For issues or questions:
-- Check the [SETUP_GUIDE.md](SETUP_GUIDE.md) for detailed setup instructions
-- Review error logs in browser console and backend terminal
-- Verify AWS service configurations
-
-## Roadmap
-
-- [ ] Email notifications for streaks
-- [ ] Social login (Google, GitHub)
-- [ ] Admin dashboard
-- [ ] Problem recommendations based on user level
-- [ ] Team competitions
-- [ ] Achievement badges
-- [ ] Mobile app
-- [ ] Code submission and verification
-- [ ] Discussion forums
-- [ ] Video tutorials
-
-## Authors
-
-CodeBattle Team
+For issues and questions:
+- Create an issue on GitHub
+- Check existing documentation
+- Review deployment guides
 
 ## Acknowledgments
 
-- LeetCode for problem inspiration
-- AWS for cloud services
-- Shadcn/ui for beautiful components
-
-
-## 🚀 EC2 Deployment
-
-### Quick Setup on EC2
-
-For detailed EC2 deployment instructions, see [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md)
-
-#### Windows EC2:
-```bash
-setup-ec2.bat
-```
-
-#### Linux EC2:
-```bash
-chmod +x setup-ec2.sh
-./setup-ec2.sh
-```
-
-### Manual EC2 Setup
-
-1. **Clone repository on EC2**
-2. **Create backend/.env with AWS credentials**
-3. **Install dependencies**: `npm install` (root and backend)
-4. **Create DynamoDB tables**: `cd backend && npm run create-tables`
-5. **Start servers**: Backend on port 3001, Frontend on port 8081
-6. **Configure EC2 Security Group** to allow ports 3001 and 8081
-
-See [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) for complete instructions.
-
----
-
-## 📝 License
-
-MIT License - see LICENSE file for details
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📧 Support
-
-For issues and questions, please open an issue on GitHub.
+- Codeforces for problem data
+- AWS for cloud infrastructure
+- shadcn/ui for UI components

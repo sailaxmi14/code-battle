@@ -6,6 +6,7 @@ interface LeaderboardEntry {
   college: string;
   level: string;
   streak: number;
+  bestStreak?: number;
   weeklyXP: number;
   trend: "up" | "down" | "same";
 }
@@ -33,7 +34,8 @@ const LeaderboardTable = ({ entries }: { entries: LeaderboardEntry[] }) => {
             <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Rank</th>
             <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Player</th>
             <th className="hidden px-4 py-3 text-left text-xs font-medium text-muted-foreground md:table-cell">Level</th>
-            <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">🔥 Streak</th>
+            <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">🔥 Current</th>
+            <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">🏆 Best</th>
             <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Weekly XP</th>
             <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">Trend</th>
           </tr>
@@ -69,6 +71,9 @@ const LeaderboardTable = ({ entries }: { entries: LeaderboardEntry[] }) => {
               </td>
               <td className="px-4 py-3 text-center">
                 <span className="text-sm font-bold text-streak">{entry.streak}</span>
+              </td>
+              <td className="px-4 py-3 text-center">
+                <span className="text-sm font-bold text-rank-gold">{entry.bestStreak || 0}</span>
               </td>
               <td className="px-4 py-3 text-right">
                 <span className="text-sm font-mono font-medium text-xp">{entry.weeklyXP.toLocaleString()}</span>

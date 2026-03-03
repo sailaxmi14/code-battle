@@ -12,6 +12,7 @@ interface LeaderboardEntry {
   college?: string;
   level: string;
   streak?: number;
+  bestStreak?: number;
   weeklyXP?: number;
   xp?: number;
   trend?: "up" | "down" | "same";
@@ -33,7 +34,7 @@ const Leaderboard = () => {
         }
 
         const headers = { 'Authorization': `Bearer ${token}` };
-        const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
+        const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace('/api', '');
 
         // Fetch current user data first
         const userRes = await fetch(`${API_URL}/api/users/me`, { headers });
@@ -56,7 +57,8 @@ const Leaderboard = () => {
               name: entry.name,
               college: entry.college,
               level: entry.level,
-              streak: entry.current_streak || entry.currentStreak,
+              streak: entry.current_streak || entry.currentStreak || 0,
+              bestStreak: entry.best_streak || entry.bestStreak || 0,
               weeklyXP: entry.weekly_xp || entry.xp,
               trend: "same" as const,
             }))
@@ -64,14 +66,14 @@ const Leaderboard = () => {
         } else {
           // Mock weekly data as fallback
           const mockWeekly: LeaderboardEntry[] = [
-            { rank: 1, name: 'Alice Johnson', college: 'MIT', level: 'Gold III', streak: 15, weeklyXP: 1250, trend: 'up' },
-            { rank: 2, name: 'Bob Smith', college: 'Stanford', level: 'Gold II', streak: 10, weeklyXP: 1100, trend: 'up' },
-            { rank: 3, name: 'Charlie Brown', college: 'Harvard', level: 'Gold I', streak: 8, weeklyXP: 950, trend: 'same' },
-            { rank: 4, name: 'Test User', college: 'Your College', level: 'Silver III', streak: 5, weeklyXP: 850, trend: 'up' },
-            { rank: 5, name: 'Diana Prince', college: 'Berkeley', level: 'Silver II', streak: 4, weeklyXP: 700, trend: 'down' },
-            { rank: 6, name: 'Eve Wilson', college: 'CMU', level: 'Silver I', streak: 3, weeklyXP: 650, trend: 'same' },
-            { rank: 7, name: 'Frank Miller', college: 'Caltech', level: 'Bronze III', streak: 2, weeklyXP: 500, trend: 'up' },
-            { rank: 8, name: 'Grace Lee', college: 'Princeton', level: 'Bronze II', streak: 1, weeklyXP: 400, trend: 'same' },
+            { rank: 1, name: 'Alice Johnson', college: 'MIT', level: 'Gold III', streak: 15, bestStreak: 20, weeklyXP: 1250, trend: 'up' },
+            { rank: 2, name: 'Bob Smith', college: 'Stanford', level: 'Gold II', streak: 10, bestStreak: 15, weeklyXP: 1100, trend: 'up' },
+            { rank: 3, name: 'Charlie Brown', college: 'Harvard', level: 'Gold I', streak: 8, bestStreak: 12, weeklyXP: 950, trend: 'same' },
+            { rank: 4, name: 'Test User', college: 'Your College', level: 'Silver III', streak: 5, bestStreak: 8, weeklyXP: 850, trend: 'up' },
+            { rank: 5, name: 'Diana Prince', college: 'Berkeley', level: 'Silver II', streak: 4, bestStreak: 10, weeklyXP: 700, trend: 'down' },
+            { rank: 6, name: 'Eve Wilson', college: 'CMU', level: 'Silver I', streak: 3, bestStreak: 8, weeklyXP: 650, trend: 'same' },
+            { rank: 7, name: 'Frank Miller', college: 'Caltech', level: 'Bronze III', streak: 2, bestStreak: 5, weeklyXP: 500, trend: 'up' },
+            { rank: 8, name: 'Grace Lee', college: 'Princeton', level: 'Bronze II', streak: 1, bestStreak: 3, weeklyXP: 400, trend: 'same' },
           ];
           setWeeklyData(mockWeekly);
         }
@@ -84,7 +86,8 @@ const Leaderboard = () => {
               name: entry.name,
               college: entry.college,
               level: entry.level,
-              streak: entry.current_streak || entry.currentStreak,
+              streak: entry.current_streak || entry.currentStreak || 0,
+              bestStreak: entry.best_streak || entry.bestStreak || 0,
               weeklyXP: entry.xp,
               trend: "same" as const,
             }))
@@ -92,14 +95,14 @@ const Leaderboard = () => {
         } else {
           // Mock all-time data as fallback
           const mockAlltime: LeaderboardEntry[] = [
-            { rank: 1, name: 'Alice Johnson', college: 'MIT', level: 'Platinum I', streak: 15, weeklyXP: 15000, trend: 'same' },
-            { rank: 2, name: 'Bob Smith', college: 'Stanford', level: 'Gold III', streak: 10, weeklyXP: 12500, trend: 'same' },
-            { rank: 3, name: 'Charlie Brown', college: 'Harvard', level: 'Gold II', streak: 8, weeklyXP: 10200, trend: 'up' },
-            { rank: 4, name: 'Diana Prince', college: 'Berkeley', level: 'Gold I', streak: 4, weeklyXP: 8900, trend: 'down' },
-            { rank: 5, name: 'Eve Wilson', college: 'CMU', level: 'Silver III', streak: 3, weeklyXP: 7500, trend: 'same' },
-            { rank: 6, name: 'Test User', college: 'Your College', level: 'Silver II', streak: 5, weeklyXP: 6800, trend: 'up' },
-            { rank: 7, name: 'Frank Miller', college: 'Caltech', level: 'Silver I', streak: 2, weeklyXP: 5500, trend: 'same' },
-            { rank: 8, name: 'Grace Lee', college: 'Princeton', level: 'Bronze III', streak: 1, weeklyXP: 4200, trend: 'up' },
+            { rank: 1, name: 'Alice Johnson', college: 'MIT', level: 'Platinum I', streak: 15, bestStreak: 25, weeklyXP: 15000, trend: 'same' },
+            { rank: 2, name: 'Bob Smith', college: 'Stanford', level: 'Gold III', streak: 10, bestStreak: 18, weeklyXP: 12500, trend: 'same' },
+            { rank: 3, name: 'Charlie Brown', college: 'Harvard', level: 'Gold II', streak: 8, bestStreak: 15, weeklyXP: 10200, trend: 'up' },
+            { rank: 4, name: 'Diana Prince', college: 'Berkeley', level: 'Gold I', streak: 4, bestStreak: 12, weeklyXP: 8900, trend: 'down' },
+            { rank: 5, name: 'Eve Wilson', college: 'CMU', level: 'Silver III', streak: 3, bestStreak: 10, weeklyXP: 7500, trend: 'same' },
+            { rank: 6, name: 'Test User', college: 'Your College', level: 'Silver II', streak: 5, bestStreak: 8, weeklyXP: 6800, trend: 'up' },
+            { rank: 7, name: 'Frank Miller', college: 'Caltech', level: 'Silver I', streak: 2, bestStreak: 6, weeklyXP: 5500, trend: 'same' },
+            { rank: 8, name: 'Grace Lee', college: 'Princeton', level: 'Bronze III', streak: 1, bestStreak: 4, weeklyXP: 4200, trend: 'up' },
           ];
           setAlltimeData(mockAlltime);
         }

@@ -44,7 +44,7 @@ const History = () => {
         }
 
         const headers = { 'Authorization': `Bearer ${token}` };
-        const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
+        const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace('/api', '');
 
         // Fetch from BOTH old history API and new solved-problems API
         const [oldHistoryRes, newHistoryRes, oldStatsRes, newStatsRes] = await Promise.all([

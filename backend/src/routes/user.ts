@@ -28,8 +28,18 @@ router.get('/me', authenticate, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     
+    // Get streak information with timer
+    const { getUserStreak, getStreakTimeRemaining, isStreakExpiringSoon } = await import('../services/dynamodbService.js');
+    const streak = await getUserStreak(req.userId!);
+    const timeRemaining = getStreakTimeRemaining(streak);
+    const expiringSoon = isStreakExpiringSoon(streak);
+    
     console.log('✅ User profile fetched successfully');
-    res.json(user);
+    res.json({
+      ...user,
+      streakTimeRemaining: timeRemaining,
+      streakExpiringSoon: expiringSoon,
+    });
   } catch (error: any) {
     console.error('❌ Error fetching user:', error.message);
     res.status(500).json({ error: 'Failed to fetch user' });
@@ -39,7 +49,7 @@ router.get('/me', authenticate, async (req, res) => {
 // Update user profile
 router.patch('/me', authenticate, async (req, res) => {
   try {
-    const { name, college } = req.body;
+    const { name, college, codeforcesHandle } = req.body;
     
     if (MOCK_MODE) {
       const user = Array.from(mockUsers.values()).find(u => u.userId === req.userId);
@@ -49,6 +59,7 @@ router.patch('/me', authenticate, async (req, res) => {
       
       if (name) user.name = name;
       if (college) user.college = college;
+      if (codeforcesHandle !== undefined) user.codeforcesHandle = codeforcesHandle;
       user.updatedAt = new Date().toISOString();
       
       return res.json(user);
@@ -57,6 +68,7 @@ router.patch('/me', authenticate, async (req, res) => {
     const updates: any = {};
     if (name) updates.name = name;
     if (college) updates.college = college;
+    if (codeforcesHandle !== undefined) updates.codeforcesHandle = codeforcesHandle;
     
     const user = await dynamodbUserService.updateUser(req.userId!, updates);
     res.json(user);

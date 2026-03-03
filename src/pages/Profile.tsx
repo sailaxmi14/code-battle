@@ -15,6 +15,7 @@ interface User {
   name: string;
   email: string;
   college?: string;
+  codeforcesHandle?: string;
   level: string;
   xp: number;
   current_streak: number;
@@ -34,6 +35,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [editName, setEditName] = useState("");
   const [editCollege, setEditCollege] = useState("");
+  const [editCodeforcesHandle, setEditCodeforcesHandle] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const { toast } = useToast();
@@ -49,7 +51,7 @@ const Profile = () => {
         }
 
         const headers = { 'Authorization': `Bearer ${token}` };
-        const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
+        const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace('/api', '');
 
         // Fetch user data
         const userRes = await fetch(`${API_URL}/api/users/me`, { headers });
@@ -66,6 +68,7 @@ const Profile = () => {
           email: userData.email,
           name: userData.name,
           college: userData.college,
+          codeforcesHandle: userData.codeforcesHandle,
           level: userData.level || 'Bronze I',
           xp: userData.xp || 0,
           current_streak: userData.currentStreak || 0,
@@ -76,6 +79,7 @@ const Profile = () => {
         setUser(mappedUser);
         setEditName(mappedUser.name);
         setEditCollege(mappedUser.college || "");
+        setEditCodeforcesHandle(mappedUser.codeforcesHandle || "");
 
         // Try to fetch history
         const historyRes = await fetch(`${API_URL}/api/streaks/history`, { headers }).catch(() => null);
@@ -119,6 +123,7 @@ const Profile = () => {
         throw new Error('Not authenticated');
       }
 
+      const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace('/api', '');
       const headers = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -130,6 +135,7 @@ const Profile = () => {
         body: JSON.stringify({
           name: editName,
           college: editCollege,
+          codeforcesHandle: editCodeforcesHandle,
         }),
       });
 
@@ -144,6 +150,7 @@ const Profile = () => {
         ...user!,
         name: updatedUser.name,
         college: updatedUser.college,
+        codeforcesHandle: updatedUser.codeforcesHandle,
       });
       
       setIsEditing(false);
@@ -211,6 +218,11 @@ const Profile = () => {
                 <h1 className="text-2xl font-bold">{user.name}</h1>
                 <p className="text-muted-foreground">{user.email}</p>
                 <p className="text-muted-foreground text-sm">{user.college || "No college specified"}</p>
+                {user.codeforcesHandle && (
+                  <p className="text-muted-foreground text-sm">
+                    Codeforces: <span className="font-mono text-primary">{user.codeforcesHandle}</span>
+                  </p>
+                )}
                 <div className="mt-3 flex flex-wrap gap-2">
                   <span className={`rounded-full border px-3 py-0.5 text-xs font-bold ${getLevelColor(user.level)}`}>
                     {user.level}
@@ -251,6 +263,18 @@ const Profile = () => {
                           value={editCollege}
                           onChange={(e) => setEditCollege(e.target.value)}
                         />
+                      </div>
+                      <div>
+                        <Label htmlFor="codeforcesHandle">Codeforces Username</Label>
+                        <Input
+                          id="codeforcesHandle"
+                          placeholder="e.g., tourist"
+                          value={editCodeforcesHandle}
+                          onChange={(e) => setEditCodeforcesHandle(e.target.value)}
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Your Codeforces username/handle (not email) for automatic verification. Find it at codeforces.com/profile/[your-username]
+                        </p>
                       </div>
                       <Button onClick={handleUpdateProfile} className="w-full">
                         Save Changes

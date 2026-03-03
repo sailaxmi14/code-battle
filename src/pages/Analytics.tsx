@@ -64,7 +64,7 @@ const Analytics = () => {
         }
 
         const headers = { 'Authorization': `Bearer ${token}` };
-        const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
+        const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace('/api', '');
 
         // Try to fetch analytics from backend
         const [topicsRes, weaknessesRes, difficultyRes, rewardsRes, reportRes] = await Promise.all([
