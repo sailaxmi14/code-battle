@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Flame, Swords, LogOut, Bell, History, Zap, Trophy, User, KeyRound, Target } from "lucide-react";
+import { Flame, Swords, LogOut, Bell, History, Zap, Trophy, User, KeyRound, Target, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,6 +16,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const Navbar = () => {
   const location = useLocation();
@@ -24,6 +31,7 @@ const Navbar = () => {
   const [showNotificationDot, setShowNotificationDot] = useState(false);
   const [notifications, setNotifications] = useState<string[]>([]);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -60,9 +68,19 @@ const Navbar = () => {
     return 'U';
   };
 
+  // Navigation links data
+  const navLinks = [
+    { to: "/dashboard", icon: Flame, label: "Dashboard" },
+    { to: "/levels", icon: Target, label: "Levels" },
+    { to: "/streaks", icon: Zap, label: "Streaks" },
+    { to: "/history", icon: History, label: "History" },
+    { to: "/leaderboard", icon: Trophy, label: "Leaderboard" },
+  ];
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <Swords className="h-7 w-7 text-primary" />
           <span className="text-xl font-bold tracking-tight">
@@ -70,50 +88,27 @@ const Navbar = () => {
           </span>
         </Link>
 
+        {/* Desktop Navigation - Hidden on mobile */}
         {isAuthenticated && (
           <div className="hidden items-center gap-6 md:flex">
-            <Link
-              to="/dashboard"
-              className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <Flame className="h-4 w-4" />
-              Dashboard
-            </Link>
-            <Link
-              to="/levels"
-              className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <Target className="h-4 w-4" />
-              Levels
-            </Link>
-            <Link
-              to="/streaks"
-              className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <Zap className="h-4 w-4" />
-              Streaks
-            </Link>
-            <Link
-              to="/history"
-              className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <History className="h-4 w-4" />
-              History
-            </Link>
-            <Link
-              to="/leaderboard"
-              className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <Trophy className="h-4 w-4" />
-              Leaderboard
-            </Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <link.icon className="h-4 w-4" />
+                {link.label}
+              </Link>
+            ))}
           </div>
         )}
 
+        {/* Right side actions */}
         <div className="flex items-center gap-3">
           {!isAuthenticated ? (
             <>
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild className="hidden sm:flex">
                 <Link to="/login">Log In</Link>
               </Button>
               <Button size="sm" className="bg-gradient-cta font-semibold shadow-neon-primary" asChild>
@@ -122,6 +117,67 @@ const Navbar = () => {
             </>
           ) : (
             <>
+              {/* Mobile Menu Button - Only visible on mobile */}
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="md:hidden">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-64">
+                  <SheetHeader>
+                    <SheetTitle className="flex items-center gap-2">
+                      <Swords className="h-6 w-6 text-primary" />
+                      <span>Code<span className="text-primary">Battle</span></span>
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-8 flex flex-col space-y-4">
+                    {navLinks.map((link) => (
+                      <Link
+                        key={link.to}
+                        to={link.to}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 text-base text-muted-foreground transition-colors hover:text-foreground py-2"
+                      >
+                        <link.icon className="h-5 w-5" />
+                        {link.label}
+                      </Link>
+                    ))}
+                    <div className="pt-4 border-t">
+                      <Link
+                        to="/profile"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 text-base text-muted-foreground transition-colors hover:text-foreground py-2"
+                      >
+                        <User className="h-5 w-5" />
+                        Profile
+                      </Link>
+                      <button
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setShowChangePasswordModal(true);
+                        }}
+                        className="flex items-center gap-3 text-base text-muted-foreground transition-colors hover:text-foreground py-2 w-full"
+                      >
+                        <KeyRound className="h-5 w-5" />
+                        Change Password
+                      </button>
+                      <button
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          handleLogout();
+                        }}
+                        className="flex items-center gap-3 text-base text-destructive transition-colors hover:text-destructive/80 py-2 w-full"
+                      >
+                        <LogOut className="h-5 w-5" />
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+
+              {/* Notifications */}
               <Popover onOpenChange={handleNotificationOpen}>
                 <PopoverTrigger asChild>
                   <Button 
@@ -159,9 +215,10 @@ const Navbar = () => {
                 </PopoverContent>
               </Popover>
               
+              {/* User Profile Dropdown - Hidden on mobile, shown in hamburger menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
+                  <Button variant="ghost" size="icon" className="rounded-full hidden md:flex">
                     <div className="h-8 w-8 rounded-full bg-gradient-cta flex items-center justify-center text-sm font-bold text-primary-foreground">
                       {getUserInitial()}
                     </div>
@@ -185,6 +242,13 @@ const Navbar = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {/* Mobile User Avatar - Only visible on mobile */}
+              <Link to="/profile" className="md:hidden">
+                <div className="h-8 w-8 rounded-full bg-gradient-cta flex items-center justify-center text-sm font-bold text-primary-foreground">
+                  {getUserInitial()}
+                </div>
+              </Link>
             </>
           )}
         </div>

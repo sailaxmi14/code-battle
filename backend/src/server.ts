@@ -31,6 +31,9 @@ const allowedOrigins = [
   'http://localhost:8081',
   'http://localhost:8082',
   'http://localhost:8083',
+  'http://3.239.212.18:8080',
+  'http://3.239.212.18:8081',
+  'http://3.239.212.18',
   process.env.FRONTEND_URL || 'http://localhost:8080'
 ];
 
