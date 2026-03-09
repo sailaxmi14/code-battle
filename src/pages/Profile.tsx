@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import ChangePasswordModal from "@/components/ChangePasswordModal";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface User {
   id: string | number;
@@ -40,6 +41,19 @@ const Profile = () => {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const { toast } = useToast();
   const { user: authUser } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Check if we should highlight Codeforces handle field
+  useEffect(() => {
+    if (location.state?.highlightCodeforcesHandle) {
+      setIsEditing(true);
+      toast({
+        title: "Add Codeforces Handle",
+        description: "Please enter your Codeforces username to verify solutions",
+      });
+    }
+  }, [location.state]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -158,6 +172,13 @@ const Profile = () => {
         title: "Success",
         description: "Profile updated successfully",
       });
+
+      // If redirected from dashboard, go back
+      if (location.state?.highlightCodeforcesHandle) {
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1000);
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -265,15 +286,19 @@ const Profile = () => {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="codeforcesHandle">Codeforces Username</Label>
+                        <Label htmlFor="codeforcesHandle" className="text-base font-semibold">
+                          Codeforces Username <span className="text-destructive">*</span>
+                        </Label>
                         <Input
                           id="codeforcesHandle"
                           placeholder="e.g., tourist"
                           value={editCodeforcesHandle}
                           onChange={(e) => setEditCodeforcesHandle(e.target.value)}
+                          className={location.state?.highlightCodeforcesHandle ? "border-2 border-primary ring-2 ring-primary/20" : ""}
+                          autoFocus={location.state?.highlightCodeforcesHandle}
                         />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Your Codeforces username/handle (not email) for automatic verification. Find it at codeforces.com/profile/[your-username]
+                        <p className="text-sm text-muted-foreground mt-2 bg-primary/5 p-2 rounded">
+                          ⚠️ Required for solution verification. Your Codeforces username/handle (not email). Find it at codeforces.com/profile/[your-username]
                         </p>
                       </div>
                       <Button onClick={handleUpdateProfile} className="w-full">

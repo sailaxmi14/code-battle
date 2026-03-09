@@ -1,58 +1,95 @@
-# CodeBattle - Competitive Programming Platform
+# CodeBattle - Competitive Programming Practice Tracker
 
-A full-stack web application for tracking coding progress, managing daily problem-solving streaks, and competing with other coders.
+A full-stack web application for tracking coding progress on Codeforces with structured difficulty progression, daily problem tracking, and gamification features.
 
-## Features
+## 🎯 Overview
 
-- 🔥 **Daily Streak Tracking** - Maintain your coding consistency
-- 🏆 **Leaderboard System** - Compete with other coders
-- � **Analytics Dashboard** - Track your progress and performance
-- ✅ **Codeforces Integration** - Auto-verify problem submissions
-- 👤 **User Profiles** - Manage your coding journey
-- � **XP & Leveling System** - Earn rewards for solving problems
+CodeBattle is a practice tracker that helps you:
+- Track your Codeforces problem-solving progress
+- Follow a structured difficulty progression (Basic → Easy → Medium → Hard → Difficult)
+- Maintain daily coding streaks
+- Compete with other coders on leaderboards
+- Earn XP and unlock new difficulty levels
 
-## Tech Stack
+## ✨ Key Features
+
+### 📅 Daily Problem System
+- Get 3 curated problems daily from your current difficulty level
+- Problems selected consistently for the entire day
+- Clean to-do list style interface
+- One-click "Solve" button opens Codeforces problem page
+
+### 🎚️ 5-Level Difficulty Progression
+- **Basic** (800-900) → **Easy** (1000-1100) → **Medium** (1200-1400) → **Hard** (1500-1700) → **Difficult** (1800-2000)
+- Solve 51 problems to unlock next level
+- Visual progress bars and completion tracking
+- Automatic level progression
+
+### ✅ Automatic Verification
+- Verify solutions via Codeforces API
+- Automatic progress tracking
+- XP rewards based on difficulty
+- Streak maintenance
+
+### 🔥 Streak System
+- Daily streak tracking with 12-hour grace period
+- Current streak resets if you miss a day
+- Best streak permanently stored
+- Visual streak indicators
+
+### 🏆 Leaderboard & Competition
+- Weekly and all-time rankings
+- XP-based scoring system
+- Real-time updates
+- Compare with other coders
+
+### 💡 Hint System
+- Conceptual guidance without code solutions
+- Topics and approach explanations
+- Thinking process questions
+- No spoilers - learn by understanding
+
+## 🛠️ Tech Stack
 
 ### Frontend
-- React 18 with TypeScript
-- Vite (Build tool)
-- Tailwind CSS + shadcn/ui
-- React Router
-- Framer Motion
+- **React 18** with TypeScript
+- **Vite** - Fast build tool
+- **Tailwind CSS** + **shadcn/ui** - Modern UI components
+- **React Router** - Navigation
+- **Framer Motion** - Smooth animations
 
 ### Backend
-- Node.js + Express
-- TypeScript
-- AWS Cognito (Authentication)
-- AWS DynamoDB (Database)
-- Codeforces API Integration
+- **Node.js** + **Express** - REST API
+- **TypeScript** - Type safety
+- **AWS Cognito** - Authentication
+- **AWS DynamoDB** - Database
+- **Codeforces API** - Problem verification
 
-## Prerequisites
+## 🚀 Quick Start
 
+### Prerequisites
 - Node.js 18+ and npm
 - AWS Account (for Cognito & DynamoDB)
-- Codeforces API credentials (optional)
-
-## Local Development Setup
+- Codeforces account
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/sailaxmi14/code-battle.git
+git clone <repository-url>
 cd code-battle
 ```
 
 ### 2. Install Dependencies
 ```bash
-# Install frontend dependencies
+# Frontend
 npm install
 
-# Install backend dependencies
+# Backend
 cd backend
 npm install
 cd ..
 ```
 
-### 3. Configure Environment Variables
+### 3. Configure Environment
 
 **Frontend (.env):**
 ```env
@@ -63,7 +100,6 @@ VITE_API_URL=http://localhost:3001/api
 ```env
 PORT=3001
 NODE_ENV=development
-JWT_SECRET=your-jwt-secret-here
 FRONTEND_URL=http://localhost:8080
 
 # AWS Configuration
@@ -71,38 +107,28 @@ AWS_REGION=us-east-1
 AWS_ACCESS_KEY_ID=your-access-key
 AWS_SECRET_ACCESS_KEY=your-secret-key
 
+# Cognito
+COGNITO_USER_POOL_ID=your-pool-id
+COGNITO_CLIENT_ID=your-client-id
+
 # DynamoDB Tables
+DYNAMODB_USERS_TABLE=CodeBattleUsers
 DYNAMODB_PROBLEMS_TABLE=CodeBattleProblems
-
-# Codeforces API (optional)
-CODEFORCES_API_KEY=your-api-key
-CODEFORCES_API_SECRET=your-api-secret
+DYNAMODB_STREAKS_TABLE=CodeBattleStreaks
 ```
 
-### 4. Setup DynamoDB Tables
-
-Run the setup scripts to create required tables:
-
-**Windows:**
+### 4. Setup Database
 ```bash
 cd backend
+# Windows
 .\setup-dynamodb.bat
-```
 
-**Linux/Mac:**
-```bash
-cd backend
+# Linux/Mac
 chmod +x setup-dynamodb.sh
 ./setup-dynamodb.sh
 ```
 
-### 5. Build Backend
-```bash
-cd backend
-npm run build
-```
-
-### 6. Start Development Servers
+### 5. Start Development Servers
 
 **Terminal 1 - Backend:**
 ```bash
@@ -115,146 +141,209 @@ npm run dev
 npm run dev
 ```
 
-Access the application at: http://localhost:5173
+Access at: **http://localhost:8080** (or 8081 if 8080 is in use)
 
-## Production Build
+## 📖 User Guide
 
-### Build Frontend
-```bash
-npm run build
+### Getting Started
+
+1. **Register/Login**
+   - Create account with email and password
+   - Verify email (if required)
+   - Login to access dashboard
+
+2. **Add Codeforces Handle**
+   - Go to Profile page
+   - Add your Codeforces username (not email)
+   - Required for solution verification
+
+3. **Start Solving**
+   - Dashboard shows 3 daily problems
+   - Click "Solve" to open problem on Codeforces
+   - Solve and submit on Codeforces
+   - Return and click "Check" to verify
+
+4. **Track Progress**
+   - View progress on Dashboard
+   - Check Levels page for overall progression
+   - Monitor streaks on Streaks page
+   - Compare on Leaderboard
+
+### Navigation
+
+- **Dashboard** - Today's 3 problems and daily progress
+- **Levels** - View all difficulty levels and progress
+- **Streaks** - Track your daily coding consistency
+- **History** - View past solved problems
+- **Leaderboard** - Compare with other users
+- **Profile** - Manage account and Codeforces handle
+
+## 🎮 How It Works
+
+### Problem Flow
+```
+1. User clicks "Solve" → Codeforces problem opens
+2. User solves problem on Codeforces
+3. User returns to CodeBattle
+4. User clicks "Check" → System verifies via API
+5. If accepted → Progress updates, XP awarded
+6. If not accepted → User can try again
 ```
 
-### Serve Production Build
-```bash
-npm install -g serve
-serve -s dist -p 8080
+### Difficulty Progression
+```
+Basic (0/51) → Solve 51 → Easy (0/51) → Solve 51 → Medium (0/51)
+                                                          ↓
+                                                    Continue...
 ```
 
-## EC2 Deployment
+### Daily System
+- 3 problems per day from current level
+- Same 3 problems all day (date-based seeding)
+- New problems tomorrow
+- Encourages consistent daily practice
 
-See [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) for detailed EC2 deployment instructions.
-
-### Quick EC2 Setup
-
-1. **Update Environment Variables** with EC2 IP
-2. **Build Backend**: `cd backend && npm run build`
-3. **Start Backend**: `npm run dev`
-4. **Build Frontend**: `npm run build`
-5. **Serve Frontend**: `serve -s dist -p 8080`
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 code-battle/
-├── src/                      # Frontend source
-│   ├── components/          # React components
-│   ├── pages/              # Page components
-│   ├── services/           # API services
-│   ├── contexts/           # React contexts
-│   └── lib/                # Utilities
-├── backend/                 # Backend source
+├── src/                          # Frontend
+│   ├── components/              # React components
+│   │   ├── ui/                 # shadcn/ui components
+│   │   ├── Navbar.tsx          # Navigation bar
+│   │   └── ProtectedRoute.tsx  # Auth guard
+│   ├── pages/                   # Page components
+│   │   ├── Dashboard.tsx       # Daily problems (to-do style)
+│   │   ├── Levels.tsx          # Difficulty levels overview
+│   │   ├── Profile.tsx         # User profile
+│   │   ├── Leaderboard.tsx     # Rankings
+│   │   └── Streaks.tsx         # Streak tracking
+│   ├── contexts/                # React contexts
+│   │   └── AuthContext.tsx     # Authentication state
+│   └── services/                # API services
+│       └── cognitoIntegrationService.ts
+├── backend/                      # Backend
 │   ├── src/
-│   │   ├── routes/         # API routes
-│   │   ├── services/       # Business logic
-│   │   ├── middleware/     # Express middleware
-│   │   └── config/         # Configuration
-│   └── dist/               # Compiled backend
-├── public/                  # Static assets
-└── dist/                    # Production build
-
+│   │   ├── routes/             # API endpoints
+│   │   │   ├── difficultyProgression.ts  # Main system
+│   │   │   ├── auth.ts         # Authentication
+│   │   │   └── user.ts         # User management
+│   │   ├── services/           # Business logic
+│   │   │   ├── difficultyProgressionService.ts
+│   │   │   ├── codeforcesService.ts
+│   │   │   └── dynamodbService.ts
+│   │   ├── middleware/         # Express middleware
+│   │   │   └── auth.ts         # JWT verification
+│   │   └── config/             # Configuration
+│   │       └── env.ts          # Environment setup
+│   └── dist/                    # Compiled output
+└── public/                       # Static assets
 ```
 
-## Key Features Explained
+## 🔌 API Endpoints
 
-### Streak System
-- Solve at least 1 problem per day to maintain streak
-- Current streak resets if you miss a day
-- Best streak is your personal record (never decreases)
-- 12-hour grace period for consecutive days
-
-### Codeforces Integration
-- Auto-verify problem submissions
-- Username saved after first verification
-- Supports Codeforces username (not email)
-- Real-time submission checking
-
-### Leaderboard
-- Weekly and All-Time rankings
-- Shows current and best streaks
-- XP-based ranking system
-- Real-time updates
-
-## API Endpoints
+### Difficulty Progression
+- `GET /api/difficulty/progress` - Get user progress
+- `GET /api/difficulty/daily-problems` - Get today's 3 problems
+- `GET /api/difficulty/questions/:level` - Get problems for level
+- `GET /api/difficulty/hint/:problemId` - Get problem hint
+- `POST /api/difficulty/complete/:level/:questionId` - Verify solution
+- `POST /api/difficulty/reset` - Reset progress (testing)
 
 ### Authentication
 - `POST /api/auth/cognito-register` - Register user
 - `POST /api/auth/cognito-login` - Login user
 
-### User
-- `GET /api/users/me` - Get current user
-- `PATCH /api/users/me` - Update profile
-
-### Problems
-- `GET /api/codeforces-problems/daily` - Get daily problems
-- `POST /api/codeforces-problems/verify/:problemId` - Verify solution
+### User Management
+- `GET /api/users/me` - Get current user profile
+- `PATCH /api/users/me` - Update profile (including Codeforces handle)
 
 ### Leaderboard
-- `GET /api/leaderboard/weekly` - Weekly leaderboard
-- `GET /api/leaderboard/alltime` - All-time leaderboard
+- `GET /api/leaderboard/weekly` - Weekly rankings
+- `GET /api/leaderboard/alltime` - All-time rankings
 
 ### Streaks
+- `GET /api/streaks/current` - Current streak info
 - `GET /api/streaks/history` - Streak history
-- `GET /api/streaks/current` - Current streak
 
-## Environment Variables
+## 🔧 Configuration
 
-### Required
+### Environment Variables
+
+**Required:**
 - `AWS_ACCESS_KEY_ID` - AWS credentials
 - `AWS_SECRET_ACCESS_KEY` - AWS credentials
-- `AWS_REGION` - AWS region (default: us-east-1)
+- `COGNITO_USER_POOL_ID` - Cognito user pool
+- `COGNITO_CLIENT_ID` - Cognito app client
 
-### Optional
-- `CODEFORCES_API_KEY` - For Codeforces integration
-- `CODEFORCES_API_SECRET` - For Codeforces integration
-- `JWT_SECRET` - Custom JWT secret
+**Optional:**
+- `PORT` - Backend port (default: 3001)
+- `NODE_ENV` - Environment (development/production)
+- `CODEFORCES_API_KEY` - For authenticated Codeforces requests
+- `CODEFORCES_API_SECRET` - For authenticated Codeforces requests
 
-## Troubleshooting
+## 🐛 Troubleshooting
 
-### CORS Errors
-- Ensure `FRONTEND_URL` in backend/.env matches your frontend URL
-- Rebuild backend after changing .env
+### Backend Connection Issues
+```bash
+# Check if backend is running
+curl http://localhost:3001/health
 
-### Connection Refused
-- Check backend is running on correct port
-- Verify `VITE_API_URL` in frontend .env
-- Rebuild frontend after changing .env
+# Restart backend
+cd backend
+npm run dev
+```
 
-### DynamoDB Errors
-- Verify AWS credentials are correct
-- Check DynamoDB tables exist
-- Ensure IAM permissions are set
+### Frontend Issues
+```bash
+# Clear cache and restart
+rm -rf node_modules/.vite
+npm run dev
+```
 
-## Contributing
+### Codeforces Verification Issues
+1. Ensure Codeforces handle is correct (username, not email)
+2. Verify you're logged into Codeforces
+3. Check problem was submitted and accepted (verdict: OK)
+4. Wait a few seconds after submission before checking
 
+### DynamoDB Issues
+1. Verify AWS credentials are correct
+2. Check tables exist in AWS Console
+3. Ensure IAM permissions include DynamoDB access
+
+## 📚 Additional Documentation
+
+- [QUICK-START-GUIDE.md](QUICK-START-GUIDE.md) - Detailed setup instructions
+- [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) - EC2 deployment guide
+
+## 🤝 Contributing
+
+Contributions are welcome! Please:
 1. Fork the repository
 2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License.
 
-## Support
+## 🙏 Acknowledgments
 
-For issues and questions:
+- **Codeforces** - For providing the problem database and API
+- **AWS** - For cloud infrastructure
+- **shadcn/ui** - For beautiful UI components
+- **Tailwind CSS** - For utility-first styling
+
+## 📞 Support
+
+For issues or questions:
 - Create an issue on GitHub
-- Check existing documentation
-- Review deployment guides
+- Check documentation files
+- Review troubleshooting section
 
-## Acknowledgments
+---
 
-- Codeforces for problem data
-- AWS for cloud infrastructure
-- shadcn/ui for UI components
+**Happy Coding! 🚀**

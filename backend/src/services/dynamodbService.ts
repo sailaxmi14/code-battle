@@ -408,12 +408,12 @@ export async function getUserStreak(userId: string): Promise<UserStreak> {
       const streak = response.Item as UserStreak;
       
       // Check if streak should be reset due to 12-hour inactivity
-      if (streak.lastSolvedTimestamp) {
+      if (streak.lastSolvedTimestamp && streak.currentStreak > 0) {
         const now = Date.now();
         const hoursSinceLastSolved = (now - streak.lastSolvedTimestamp) / (1000 * 60 * 60);
         
         if (hoursSinceLastSolved > 12) {
-          // Reset current streak but keep highest streak
+          // Reset current streak to 0 but keep highest streak
           const resetStreak: UserStreak = {
             ...streak,
             currentStreak: 0,
@@ -422,7 +422,8 @@ export async function getUserStreak(userId: string): Promise<UserStreak> {
           
           // Save the reset streak
           await putItem(USER_STREAKS_TABLE, resetStreak);
-          console.log('⏰ Streak reset due to 12-hour inactivity:', userId);
+          console.log('⏰ Current streak reset to 0 due to 12-hour inactivity:', userId);
+          console.log('   Best streak remains:', resetStreak.highestStreak);
           return resetStreak;
         }
       }
@@ -464,36 +465,45 @@ export async function updateUserStreak(userId: string, solvedDate: string): Prom
     let newCurrentStreak = streak.currentStreak;
     let newHighestStreak = streak.highestStreak;
     
+    // Check if more than 12 hours have passed since last solve
+    const hoursSinceLastSolved = streak.lastSolvedTimestamp 
+      ? (now - streak.lastSolvedTimestamp) / (1000 * 60 * 60)
+      : 999;
+    
     if (!lastDate || streak.currentStreak === 0) {
-      // First problem ever OR streak was reset
+      // First problem ever OR streak was reset to 0
       newCurrentStreak = 1;
       newHighestStreak = Math.max(1, streak.highestStreak);
+      console.log('🎯 Starting new streak: Day 1');
+    } else if (hoursSinceLastSolved > 12) {
+      // More than 12 hours passed - reset current streak to 0, then start fresh
+      newCurrentStreak = 1; // Start new streak at 1
+      newHighestStreak = streak.highestStreak; // Keep best streak unchanged
+      console.log('⏰ 12-hour timer expired. Current streak reset. Starting fresh at Day 1');
     } else {
+      // Within 12 hours - check day difference
       const daysDiff = getDaysDifference(lastDate, solvedDate);
-      const hoursSinceLastSolved = streak.lastSolvedTimestamp 
-        ? (now - streak.lastSolvedTimestamp) / (1000 * 60 * 60)
-        : 999;
       
-      if (hoursSinceLastSolved > 12) {
-        // More than 12 hours passed - reset streak
-        newCurrentStreak = 1;
-        newHighestStreak = streak.highestStreak; // Keep best streak
-        console.log('⏰ Streak reset due to 12-hour inactivity');
-      } else if (daysDiff === 0) {
-        // Already solved today within 12 hours - no change to streak count
-        // But update timestamp
+      if (daysDiff === 0) {
+        // Same day - no change to streak count, just update timestamp
         newCurrentStreak = streak.currentStreak;
         newHighestStreak = streak.highestStreak;
+        console.log('✅ Additional problem solved today (Day', newCurrentStreak, ')');
       } else if (daysDiff === 1) {
-        // Consecutive day within 12 hours
+        // Consecutive day within 12 hours - increase streak
         newCurrentStreak = streak.currentStreak + 1;
         newHighestStreak = Math.max(newCurrentStreak, streak.highestStreak);
-        console.log('🔥 Streak increased to', newCurrentStreak);
-      } else if (daysDiff > 1) {
-        // More than 1 day gap - reset streak
+        console.log('🔥 Streak increased to Day', newCurrentStreak);
+        
+        // Update best streak if current exceeds it
+        if (newCurrentStreak > streak.highestStreak) {
+          console.log('🏆 New best streak achieved:', newCurrentStreak);
+        }
+      } else {
+        // More than 1 day gap - reset to 1
         newCurrentStreak = 1;
-        newHighestStreak = streak.highestStreak; // Keep best streak
-        console.log('💔 Streak broken due to day gap');
+        newHighestStreak = streak.highestStreak; // Keep best streak unchanged
+        console.log('💔 Day gap detected. Current streak reset. Starting fresh at Day 1');
       }
     }
     
@@ -513,7 +523,7 @@ export async function updateUserStreak(userId: string, solvedDate: string): Prom
     });
     
     await docClient.send(command);
-    console.log('✅ Streak updated:', userId, 'Current:', newCurrentStreak, 'Best:', newHighestStreak);
+    console.log('✅ Streak updated:', userId, '| Current:', newCurrentStreak, '| Best:', newHighestStreak, '| Total Problems:', updatedStreak.totalProblemsSolved);
     return updatedStreak;
   } catch (error) {
     console.error('Error updating streak:', error);

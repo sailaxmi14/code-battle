@@ -17,6 +17,8 @@ import dynamoLeaderboardRoutes from './routes/dynamoLeaderboard.js';
 import analyticsRoutes from './routes/analytics.js';
 import codeforcesProblemsRoutes from './routes/codeforcesProblems.js';
 import solvedProblemsRoutes from './routes/solvedProblems.js';
+import progressiveSystemRoutes from './routes/progressiveSystem.js';
+import difficultyProgressionRoutes from './routes/difficultyProgression.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -27,6 +29,8 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:8080',
   'http://localhost:8081',
+  'http://localhost:8082',
+  'http://localhost:8083',
   process.env.FRONTEND_URL || 'http://localhost:8080'
 ];
 
@@ -60,6 +64,8 @@ app.use('/api/leaderboard', dynamoLeaderboardRoutes);
 app.use('/api/history', dynamoHistoryRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/solved-problems', solvedProblemsRoutes);
+app.use('/api/progressive', progressiveSystemRoutes);
+app.use('/api/difficulty', difficultyProgressionRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/codeforces', codeforcesRoutes);
 app.use('/api/questions', questionsRoutes);

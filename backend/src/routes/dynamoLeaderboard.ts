@@ -12,8 +12,11 @@ router.get('/weekly', authenticate, async (req, res) => {
     // Get all users
     const allUsers = await dynamodbUserService.getAllUsers(100);
     
+    // Filter only Cognito users (users with cognitoSub)
+    const cognitoUsers = allUsers.filter(user => user.cognitoSub && user.cognitoSub.trim() !== '');
+    
     // Sort by XP descending
-    const sorted = allUsers.sort((a, b) => b.xp - a.xp);
+    const sorted = cognitoUsers.sort((a, b) => b.xp - a.xp);
     
     // Map to expected format
     const leaderboard = sorted.map((user, index) => ({
@@ -44,8 +47,11 @@ router.get('/alltime', authenticate, async (req, res) => {
     // Get all users
     const allUsers = await dynamodbUserService.getAllUsers(100);
     
+    // Filter only Cognito users (users with cognitoSub)
+    const cognitoUsers = allUsers.filter(user => user.cognitoSub && user.cognitoSub.trim() !== '');
+    
     // Sort by XP descending
-    const sorted = allUsers.sort((a, b) => b.xp - a.xp);
+    const sorted = cognitoUsers.sort((a, b) => b.xp - a.xp);
     
     // Map to expected format
     const leaderboard = sorted.map((user, index) => ({

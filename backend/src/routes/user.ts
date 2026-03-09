@@ -10,17 +10,6 @@ router.get('/me', authenticate, async (req, res) => {
   try {
     console.log('📊 Fetching user profile for userId:', req.userId);
     
-    if (MOCK_MODE) {
-      // Find user in mock database
-      const user = Array.from(mockUsers.values()).find(u => u.userId === req.userId);
-      if (!user) {
-        console.error('❌ User not found in mock database:', req.userId);
-        return res.status(404).json({ error: 'User not found' });
-      }
-      console.log('✅ Mock user profile fetched successfully');
-      return res.json(user);
-    }
-    
     const user = await dynamodbUserService.getUserById(req.userId!);
     
     if (!user) {
@@ -51,28 +40,16 @@ router.patch('/me', authenticate, async (req, res) => {
   try {
     const { name, college, codeforcesHandle } = req.body;
     
-    if (MOCK_MODE) {
-      const user = Array.from(mockUsers.values()).find(u => u.userId === req.userId);
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-      
-      if (name) user.name = name;
-      if (college) user.college = college;
-      if (codeforcesHandle !== undefined) user.codeforcesHandle = codeforcesHandle;
-      user.updatedAt = new Date().toISOString();
-      
-      return res.json(user);
-    }
-    
     const updates: any = {};
     if (name) updates.name = name;
     if (college) updates.college = college;
     if (codeforcesHandle !== undefined) updates.codeforcesHandle = codeforcesHandle;
     
     const user = await dynamodbUserService.updateUser(req.userId!, updates);
+    console.log('✅ User profile updated');
     res.json(user);
   } catch (error) {
+    console.error('❌ Error updating user:', error);
     res.status(500).json({ error: 'Failed to update user' });
   }
 });

@@ -3,6 +3,8 @@ import { authenticate } from '../middleware/auth.js';
 import {
   getUserStreak,
   getRecentActivity,
+  getStreakTimeRemaining,
+  isStreakExpiringSoon,
 } from '../services/dynamodbService.js';
 import dynamodbUserService from '../services/dynamodbUserService.js';
 
@@ -13,16 +15,27 @@ router.get('/me', authenticate, async (req, res) => {
   try {
     console.log('📊 Fetching streak for userId:', req.userId);
     
-    // Get user data from Users table (has current_streak and best_streak)
-    const user = await dynamodbUserService.getUserById(req.userId!);
+    // Get streak from UserStreaks table
+    const streak = await getUserStreak(req.userId!);
     
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+    // Calculate time remaining before streak resets
+    const timeRemaining = getStreakTimeRemaining(streak);
+    const expiringSoon = isStreakExpiringSoon(streak);
+    
+    // Format time remaining for display
+    const hoursRemaining = Math.floor(timeRemaining / (1000 * 60 * 60));
+    const minutesRemaining = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
     
     res.json({
-      current_streak: user.currentStreak || 0,
-      best_streak: user.bestStreak || 0,
+      current_streak: streak.currentStreak,
+      best_streak: streak.highestStreak,
+      total_problems_solved: streak.totalProblemsSolved,
+      last_solved_date: streak.lastSolvedDate,
+      time_remaining_ms: timeRemaining,
+      time_remaining_hours: hoursRemaining,
+      time_remaining_minutes: minutesRemaining,
+      expiring_soon: expiringSoon,
+      streak_active: streak.currentStreak > 0,
     });
   } catch (error: any) {
     console.error('❌ Error fetching streak:', error);
